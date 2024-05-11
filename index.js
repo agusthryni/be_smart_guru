@@ -207,9 +207,9 @@ app.get("/course/:id", async (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { name, email, password, verify_password } = req.params;
+  const { name, email, password, verify_password } = req.body;
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !verify_password) {
     return res.status(400).json({
       msg: "Parameter has null or invalid values",
     });
@@ -221,8 +221,8 @@ app.post("/register", async (req, res) => {
     });
   }
 
-  const hashed_password = bcrypt
-    .genSalt(process.env.SALT_ROUND)
+  const hashed_password = await bcrypt
+    .genSalt(parseInt(process.env.SALT_ROUND))
     .then((salt) => {
       return bcrypt.hash(password, salt);
     });
@@ -246,6 +246,7 @@ app.post("/register", async (req, res) => {
       });
     }
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       msg: "Failed to register user",
     });
@@ -253,7 +254,7 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-  const { email, password } = req.params;
+  const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({
@@ -263,7 +264,7 @@ app.post("/login", async (req, res) => {
 
   try {
     const loginQuery = "SELECT id, email, password FROM users WHERE email = ?";
-    const dbSelect = db.query(loginQuery, [email]);
+    const dbSelect = await db.query(loginQuery, [email]);
 
     if (dbSelect.length == 0) {
       return res.status(400).json({
@@ -272,7 +273,7 @@ app.post("/login", async (req, res) => {
     }
 
     if (dbSelect.length == 1) {
-      if (bcrypt.compare(password, dbSelect[0]["password"])) {
+      if (await bcrypt.compare(password, dbSelect[0].password)) {
         return res.status(200).json({
           msg: "Successfully logged in",
           token: jwt.sign(dbSelect[0], process.env.JWT_SECRET_KEY),
