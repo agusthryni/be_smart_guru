@@ -208,7 +208,7 @@ app.get("/course/:id", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   const { name, email, password, verify_password } = req.body;
-
+  console.log("register");
   if (!name || !email || !password || !verify_password) {
     return res.status(400).json({
       msg: "Parameter has null or invalid values",
@@ -253,8 +253,29 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.get("/user/course/:id_user", async (req, res) => {
+  const { id_user } = req.params;
+
+  try {
+    const courseQuery =
+      "SELECT * FROM courses WHERE id_user = ?";
+    const courses = await db.query(courseQuery, [id_user]);
+
+    if (courses.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Course not found or no courses available." });
+    } else if (courses.length >= 1) {
+      return res.status(200).json({ data: courses });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching course questions." });
+  }
+});
+
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
+  console.log("login");
 
   if (!email || !password) {
     return res.status(400).json({
@@ -263,7 +284,8 @@ app.post("/login", async (req, res) => {
   }
 
   try {
-    const loginQuery = "SELECT id, email, password FROM users WHERE email = ?";
+    const loginQuery =
+      "SELECT id, name, email, password FROM users WHERE email = ?";
     const dbSelect = await db.query(loginQuery, [email]);
 
     if (dbSelect.length == 0) {
