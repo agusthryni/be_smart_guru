@@ -17,9 +17,16 @@ app.get("/ping", (req, res) => {
   return res.send("Pong!");
 });
 
-app.post("/generate-course", async (req, res) => {
-  const { question_type, grade, subject, subject_topic, questions_total, choices_total } =
-    req.body;
+app.post("/generate-course/:id_user", async (req, res) => {
+  const { id_user } = req.params;
+  const {
+    question_type,
+    grade,
+    subject,
+    subject_topic,
+    questions_total,
+    choices_total,
+  } = req.body;
 
   if (
     !question_type ||
@@ -61,7 +68,7 @@ app.post("/generate-course", async (req, res) => {
     const insertCourseQuery =
       "INSERT INTO courses(id_user, grade, subject, subject_topic, questions_total, choices_total) VALUES (?, ?, ?, ?, ?, ?)";
     const courseInsertionResult = await db.query(insertCourseQuery, [
-      1,
+      id_user,
       grade,
       subject,
       subject_topic,
@@ -100,11 +107,11 @@ app.post("/generate-course", async (req, res) => {
         });
       }
     }
-  
+
     return res.status(200).json({
       msg: "Generated successfully",
       course_id: courseId,
-    })
+    });
     // res.send("Course generated successfully!");
   } catch (error) {
     return console.error("Error inserting data:", error);
@@ -165,7 +172,7 @@ app.get("/course/:id", async (req, res) => {
     const questionsWithAnswers = questions.reduce((acc, question) => {
       if (!acc[question.id]) {
         acc[question.id] = {
-          id:question.id,
+          id: question.id,
           question: question.question,
           answers: [],
         };
