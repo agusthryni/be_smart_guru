@@ -18,10 +18,11 @@ app.get("/ping", (req, res) => {
 });
 
 app.post("/generate-course", async (req, res) => {
-  const { grade, subject, subject_topic, questions_total, choices_total } =
+  const { question_type, grade, subject, subject_topic, questions_total, choices_total } =
     req.body;
 
   if (
+    !question_type ||
     !grade ||
     !subject ||
     !subject_topic ||
@@ -29,6 +30,7 @@ app.post("/generate-course", async (req, res) => {
     !choices_total
   ) {
     let missingParams = [];
+    if (!question_type) missingParams.push("question_type");
     if (!grade) missingParams.push("grade");
     if (!subject) missingParams.push("subject");
     if (!subject_topic) missingParams.push("subject_topic");
@@ -40,7 +42,7 @@ app.post("/generate-course", async (req, res) => {
       .json({ error: `Missing parameters: ${missingParams.join(", ")}` });
   }
 
-  const prompt = `Create a multiple-choice quiz for the subject ${subject} with the topic ${subject_topic} for ${grade} high school grade consisting of ${questions_total} questions. Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this:
+  const prompt = `Create a ${question_type} quiz for the subject ${subject} with the topic ${subject_topic} for ${grade} high school grade consisting of ${questions_total} questions. Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this:
   [{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}},{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}}], please use the key name exactly as the example`;
 
   const ai = new openai({
