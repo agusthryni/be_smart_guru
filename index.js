@@ -98,8 +98,12 @@ app.post("/generate-course", async (req, res) => {
         });
       }
     }
-
-    res.send("Course generated successfully!");
+  
+    return res.status(200).json({
+      msg: "Generated successfully",
+      course_id: courseId,
+    })
+    // res.send("Course generated successfully!");
   } catch (error) {
     return console.error("Error inserting data:", error);
   }
@@ -141,6 +145,55 @@ app.post("/parse-soal/:id_course", async (req, res) => {
 });
 
 app.get("/course/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Fetch the question and its possible answers from the database
+    const questionQuery =
+      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM Questions q LEFT JOIN Possible_Answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
+    const questions = await db.query(questionQuery, [id]);
+
+    if (questions.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "Course not found or no questions available." });
+    }
+
+    // Group possible answers by question ID
+    const questionsWithAnswers = questions.reduce((acc, question) => {
+      if (!acc[question.id]) {
+        acc[question.id] = {
+          id:question.id,
+          question: question.question,
+          answers: [],
+        };
+      }
+
+      if (question.answer_id) {
+        acc[question.id].answers.push({
+          id: question.answer_id,
+          content: question.answer_content,
+        });
+      }
+
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      msg: "Successfully get the question and answer",
+      data: Object.values(questionsWithAnswers),
+    });
+    // console.log(questionsWithAnswers);
+    // Object.values(questionsWithAnswers).map((question) => {
+    //   console.log(question);
+    // });
+  } catch (error) {
+    console.error("Error fetching course questions:", error);
+    res.status(500).json({ error: "Error fetching course questions." });
+  }
+});
+
+app.get("/course/test/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -257,8 +310,7 @@ app.get("/user/course/:id_user", async (req, res) => {
   const { id_user } = req.params;
 
   try {
-    const courseQuery =
-      "SELECT * FROM courses WHERE id_user = ?";
+    const courseQuery = "SELECT * FROM courses WHERE id_user = ?";
     const courses = await db.query(courseQuery, [id_user]);
 
     if (courses.length === 0) {
