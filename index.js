@@ -74,7 +74,7 @@ app.post("/generate-course", async (req, res) => {
     for (const data of json_data.data) {
       try {
         const insertQuestionQuery =
-          "INSERT INTO Questions (question, id_course) VALUES (?, ?)";
+          "INSERT INTO questions (question, id_course) VALUES (?, ?)";
         const questionInsertionResult = await db.query(insertQuestionQuery, [
           data.question,
           courseId,
@@ -85,7 +85,7 @@ app.post("/generate-course", async (req, res) => {
         for (const choice of data.choices) {
           const isCorrect = choice.content === data.answer.content;
           const insertChoiceQuery =
-            "INSERT INTO Possible_Answers (id_question, answer_content, is_correct) VALUES (?, ?, ?)";
+            "INSERT INTO possible_answers (id_question, answer_content, is_correct) VALUES (?, ?, ?)";
           await db.query(insertChoiceQuery, [
             questionId,
             choice.content,
@@ -117,7 +117,7 @@ app.post("/parse-soal/:id_course", async (req, res) => {
   for (const data of json_data) {
     try {
       const insertQuestionQuery =
-        "INSERT INTO Questions (question, id_course) VALUES (?, ?)";
+        "INSERT INTO questions (question, id_course) VALUES (?, ?)";
       const questionInsertionResult = await db.query(insertQuestionQuery, [
         data.question,
         id_course,
@@ -128,7 +128,7 @@ app.post("/parse-soal/:id_course", async (req, res) => {
       for (const choice of data.choices) {
         const isCorrect = choice.content === data.answer.content;
         const insertChoiceQuery =
-          "INSERT INTO Possible_Answers (id_question, answer_content, is_correct) VALUES (?, ?, ?)";
+          "INSERT INTO possible_answers (id_question, answer_content, is_correct) VALUES (?, ?, ?)";
         await db.query(insertChoiceQuery, [
           questionId,
           choice.content,
@@ -150,7 +150,7 @@ app.get("/course/:id", async (req, res) => {
   try {
     // Fetch the question and its possible answers from the database
     const questionQuery =
-      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM Questions q LEFT JOIN Possible_Answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
+      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM Questions q LEFT JOIN possible_answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
     const questions = await db.query(questionQuery, [id]);
 
     if (questions.length === 0) {
@@ -199,7 +199,7 @@ app.get("/course/test/:id", async (req, res) => {
   try {
     // Fetch the question and its possible answers from the database
     const questionQuery =
-      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM Questions q LEFT JOIN Possible_Answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
+      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM questions q LEFT JOIN Possible_Answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
     const questions = await db.query(questionQuery, [id]);
 
     if (questions.length === 0) {
