@@ -150,7 +150,7 @@ app.get("/course/:id", async (req, res) => {
   try {
     // Fetch the question and its possible answers from the database
     const questionQuery =
-      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM Questions q LEFT JOIN possible_answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
+      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM questions q LEFT JOIN possible_answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
     const questions = await db.query(questionQuery, [id]);
 
     if (questions.length === 0) {
