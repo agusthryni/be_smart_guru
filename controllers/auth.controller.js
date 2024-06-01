@@ -63,7 +63,7 @@ exports.login = async (req, res) => {
 
   try {
     const loginQuery =
-      "SELECT id, name, email, password FROM users WHERE email = ?";
+      "SELECT id, name, email, password, telephone, address FROM users WHERE email = ?";
     const dbSelect = await db.query(loginQuery, [email]);
 
     if (dbSelect.length == 0) {
