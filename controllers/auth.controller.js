@@ -4,6 +4,53 @@ var jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 
+exports.register = async (req, res) => {
+  const { name, email, password, verify_password } = req.body;
+  console.log("register");
+  if (!name || !email || !password || !verify_password) {
+    return res.status(400).json({
+      msg: "Parameter has null or invalid values",
+    });
+  }
+
+  if (password !== verify_password) {
+    return res.status(400).json({
+      msg: "Password doesn't match",
+    });
+  }
+
+  const hashed_password = await bcrypt
+    .genSalt(parseInt(process.env.SALT_ROUND))
+    .then((salt) => {
+      return bcrypt.hash(password, salt);
+    });
+
+  try {
+    const registerQuery =
+      "INSERT INTO users(name, email, password) VALUES(?, ?, ?)";
+    const dbInsert = await db.query(registerQuery, [
+      name,
+      email,
+      hashed_password,
+    ]);
+
+    if (dbInsert) {
+      return res.status(200).json({
+        msg: "Successfuly created the account",
+      });
+    } else {
+      return res.status(500).json({
+        msg: "Failed to register user",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      msg: "Failed to register user",
+    });
+  }
+};
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   console.log("login");
