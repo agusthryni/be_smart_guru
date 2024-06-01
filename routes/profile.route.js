@@ -1,7 +1,8 @@
 const ProfileController = require("../controllers/profile.controller");
 const router = require("express").Router();
 
-router.put("/user/edit", ProfileController.editProfile);
+router.put("/user/edit/:id_user", ProfileController.editProfile);
 router.put("/user/change_password", ProfileController.changePassword);
+router.post("/user/contact_us", ProfileController.contactUs);
 
 module.exports = router;
