@@ -1,4 +1,4 @@
-const db = require("./config/db");
+const db = require("../config/db");
 const openai = require("openai");
 
 exports.generateCourse = async (req, res) => {

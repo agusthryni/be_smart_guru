@@ -1,4 +1,4 @@
-const db = require("./config/db");
+const db = require("../config/db");
 
 exports.course = async (req, res) => {
   const { id } = req.params;

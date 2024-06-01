@@ -1,11 +1,13 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
+dotenv.config();
 
 exports.editProfile = async (req, res) => {
   const { id_user } = req.params;
   const { name, email, telp, address } = req.body;
   console.log("Change Profile");
-  if (!name || !email || !telp || !address) {
+  if (!name || !email) {
     return res.status(400).json({
       msg: "Parameter has null or invalid values",
     });
@@ -13,7 +15,7 @@ exports.editProfile = async (req, res) => {
 
   try {
     const profileQuery =
-      "UPDATE users SET name = ?, email = ?, telp = ?, address = ? WHERE id = ?";
+      "UPDATE users SET name = ?, email = ?, telephone = ?, address = ? WHERE id = ?";
     const dbInsert = await db.query(profileQuery, [
       name,
       email,
@@ -55,32 +57,55 @@ exports.changePassword = async (req, res) => {
     });
   }
 
-  const hashed_password = await bcrypt
-    .genSalt(parseInt(process.env.SALT_ROUND))
-    .then((salt) => {
-      return bcrypt.hash(new_password, salt);
-    });
-
   try {
-    const changePasswordQuery = "UPDATE users SET password = ? WHERE  id = ?";
-    const dbInsert = await db.query(changePasswordQuery, [
-      hashed_password,
-      id_user,
-    ]);
+    const checkUserQuery = "SELECT id, password FROM users WHERE id = ?";
+    const dbSelect = await db.query(checkUserQuery, [id_user]);
 
-    if (dbInsert) {
-      return res.status(200).json({
-        msg: "Successfuly update the password",
-      });
+    if (dbSelect.length == 1) {
+      if (await bcrypt.compare(password, dbSelect[0].password)) {
+        const hashed_password = await bcrypt
+          .genSalt(parseInt(process.env.SALT_ROUND))
+          .then((salt) => {
+            return bcrypt.hash(new_password, salt);
+          });
+
+        try {
+          const changePasswordQuery =
+            "UPDATE users SET password = ? WHERE  id = ?";
+          const dbInsert = await db.query(changePasswordQuery, [
+            hashed_password,
+            id_user,
+          ]);
+
+          if (dbInsert) {
+            return res.status(200).json({
+              msg: "Successfuly update the password",
+            });
+          } else {
+            return res.status(500).json({
+              msg: "Failed update the password",
+            });
+          }
+        } catch (error) {
+          console.error(error);
+          return res.status(500).json({
+            msg: "Failed update the password",
+          });
+        }
+      } else {
+        return res.status(400).json({
+          msg: "Password incorrect",
+        });
+      }
     } else {
-      return res.status(500).json({
-        msg: "Failed update the password",
+      return res.status(400).json({
+        msg: "Can't found user with that id",
       });
     }
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      msg: "Failed update the password",
+      msg: "Something went wrong when checking the user password",
     });
   }
 };
