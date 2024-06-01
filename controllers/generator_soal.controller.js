@@ -102,38 +102,37 @@ exports.generateCourse = async (req, res) => {
   }
 };
 
-exports.parseSoal,
-  async (req, res) => {
-    const { id_course } = req.params;
-    const { json_soal } = req.body;
-    const json_data = JSON.parse(json_soal);
+exports.parseSoal = async (req, res) => {
+  const { id_course } = req.params;
+  const { json_soal } = req.body;
+  const json_data = JSON.parse(json_soal);
 
-    for (const data of json_data) {
-      try {
-        const insertQuestionQuery =
-          "INSERT INTO questions (question, id_course) VALUES (?, ?)";
-        const questionInsertionResult = await db.query(insertQuestionQuery, [
-          data.question,
-          id_course,
+  for (const data of json_data) {
+    try {
+      const insertQuestionQuery =
+        "INSERT INTO questions (question, id_course) VALUES (?, ?)";
+      const questionInsertionResult = await db.query(insertQuestionQuery, [
+        data.question,
+        id_course,
+      ]);
+
+      const questionId = questionInsertionResult.insertId;
+
+      for (const choice of data.choices) {
+        const isCorrect = choice.content === data.answer.content;
+        const insertChoiceQuery =
+          "INSERT INTO possible_answers (id_question, answer_content, is_correct) VALUES (?, ?, ?)";
+        await db.query(insertChoiceQuery, [
+          questionId,
+          choice.content,
+          isCorrect,
         ]);
-
-        const questionId = questionInsertionResult.insertId;
-
-        for (const choice of data.choices) {
-          const isCorrect = choice.content === data.answer.content;
-          const insertChoiceQuery =
-            "INSERT INTO possible_answers (id_question, answer_content, is_correct) VALUES (?, ?, ?)";
-          await db.query(insertChoiceQuery, [
-            questionId,
-            choice.content,
-            isCorrect,
-          ]);
-        }
-      } catch (error) {
-        console.error("Error inserting data:", error);
-        return res.status(500).json({ error: "Error inserting data" });
       }
+    } catch (error) {
+      console.error("Error inserting data:", error);
+      return res.status(500).json({ error: "Error inserting data" });
     }
+  }
 
-    res.send("Data inserted successfully!");
-  };
+  res.send("Data inserted successfully!");
+};
