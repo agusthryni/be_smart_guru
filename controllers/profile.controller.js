@@ -1,10 +1,8 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 
-const { id_user } = req.params;
-
 exports.editProfile = async (req, res) => {
-  const { name, email, telp, address } = req.body;
+  const { name, email, telp, address, id_user } = req.body;
   console.log("Change Profile");
   if (!name || !email || !telp || !address) {
     return res.status(400).json({
@@ -41,7 +39,7 @@ exports.editProfile = async (req, res) => {
 };
 
 exports.changePassword = async (req, res) => {
-  const { password, new_password, verify_password } = req.body;
+  const { password, new_password, verify_password, id_user } = req.body;
   console.log("change password");
   if (!password || !new_password || !verify_password) {
     return res.status(400).json({
