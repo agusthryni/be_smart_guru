@@ -22,6 +22,9 @@ app.use("/", GeneratorCourseRoutes);
 const CourseRoutes = require("./routes/course.route");
 app.use("/", CourseRoutes);
 
+const ProfileRoutes = require("./routes/profile.route");
+app.use("/", ProfileRoutes);
+
 app.listen(port, () => {
   console.log(`Aplikasi berjalan pada port ${port}`);
 });
