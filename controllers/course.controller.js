@@ -164,7 +164,7 @@ exports.submit = async (req, res) => {
   const { id_user } = req.params;
   var { id_course, answers } = req.body;
 
-  answers = answers.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ');
+  answers = answers.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
   answers = JSON.parse(answers);
 
   if (!id_course || !Array.isArray(answers) || answers.length === 0) {
