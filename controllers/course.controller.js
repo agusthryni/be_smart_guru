@@ -223,3 +223,62 @@ exports.submit = async (req, res) => {
     });
   }
 };
+
+exports.stats = async (req, res) => {
+  const { id_course } = req.params;
+
+  try {
+    // Fetch total questions for the course
+    const totalQuestionsQuery = `
+      SELECT COUNT(*) as total_questions 
+      FROM questions 
+      WHERE id_course = ?
+    `;
+    const [totalQuestionsResult] = await db.query(totalQuestionsQuery, [id_course]);
+    const totalQuestions = totalQuestionsResult.total_questions;
+
+    // Fetch total correct answers for the course
+    const totalCorrectAnswersQuery = `
+      SELECT COUNT(*) as total_correct_answers
+      FROM user_answers ua
+      JOIN possible_answers pa ON ua.id_answer = pa.id
+      JOIN questions q ON ua.id_question = q.id
+      WHERE q.id_course = ? AND pa.is_correct = 1
+    `;
+    const [totalCorrectAnswersResult] = await db.query(totalCorrectAnswersQuery, [id_course]);
+    const totalCorrectAnswers = totalCorrectAnswersResult.total_correct_answers;
+
+    // Calculate total wrong answers
+    const totalWrongAnswers = totalQuestions - totalCorrectAnswers;
+
+    // Calculate total answered questions
+    const totalAnsweredQuestionsQuery = `
+      SELECT COUNT(DISTINCT id_question) as total_answered_questions
+      FROM user_answers ua
+      JOIN questions q ON ua.id_question = q.id
+      WHERE q.id_course = ?
+    `;
+    const [totalAnsweredQuestionsResult] = await db.query(totalAnsweredQuestionsQuery, [id_course]);
+    const totalAnsweredQuestions = totalAnsweredQuestionsResult.total_answered_questions;
+
+    // Calculate total not answered questions
+    const totalNotAnsweredQuestions = totalQuestions - totalAnsweredQuestions;
+
+    // Calculate score out of 100
+    const score = (totalCorrectAnswers / totalQuestions) * 100;
+
+    return res.status(200).json({
+      msg: "Successfully get course statistics",
+      score: score,
+      total_questions: totalQuestions,
+      total_correct: totalCorrectAnswers,
+      total_wrong: totalWrongAnswers,
+      total_not_answered: totalNotAnsweredQuestions,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      msg: "Failed to fetch course statistics",
+    });
+  }
+};

@@ -6,5 +6,6 @@ router.get("/course/:id/detail", CourseController.courseDetail);
 router.get("/course/test/:id", CourseController.courseTest);
 router.get("/user/course/:id_user", CourseController.userCourse);
 router.post("/submit/:id_user", CourseController.submit);
+router.get("/course/:id_course/stats", CourseController.stats);
 
 module.exports = router;
