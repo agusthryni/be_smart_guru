@@ -11,8 +11,8 @@ exports.course = async (req, res) => {
 
     if (questions.length === 0) {
       return res
-        .status(404)
-        .json({ error: "Course not found or no questions available." });
+        .status(400)
+        .json({ msg: "Course not found or no questions available." });
     }
 
     // Group possible answers by question ID
@@ -58,7 +58,7 @@ exports.courseDetail = async (req, res) => {
     const courseDetail = await db.query(courseDetailQuery, [id]);
 
     if (courseDetail.length === 0) {
-      return res.status(404).json({ error: "Course not found" });
+      return res.status(400).json({ msg: "Course not found" });
     }
 
     return res.status(200).json({
@@ -147,12 +147,15 @@ exports.userCourse = async (req, res) => {
 
     if (courses.length === 0) {
       return res
-        .status(404)
-        .json({ error: "Course not found or no courses available." });
+        .status(400)
+        .json({ msg: "User course not found or no courses available." });
     } else if (courses.length >= 1) {
-      return res.status(200).json({ data: courses });
+      return res.status(200).json({
+        msg: "Successfully get user courses",
+        data: courses,
+      });
     }
   } catch (error) {
-    res.status(500).json({ error: "Error fetching course questions." });
+    res.status(500).json({ msg: "Error fetching course questions." });
   }
 };

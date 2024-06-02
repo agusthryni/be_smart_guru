@@ -1,9 +1,39 @@
 const request = require("supertest");
 const app = "http://besg-test.panti.my.id";
+var courseId;
 
-describe("course endpoint", () => {
-  it("should fetch questions and answers for a valid course ID", async () => {
-    const res = await request(app).get("/course/1");
+describe("Endpoint Generate Course", () => {
+  it("Berhasil generate pertanyaan dan jawaban dengan data valid [200]", async () => {
+    const res = await request(app).post("/generate-course/1").send({
+      question_type: "Pilihan Ganda",
+      grade: "12",
+      subject: "Matematika",
+      subject_topic: "Kombinatorik",
+      questions_total: "5",
+      choices_total: "3",
+    });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("msg", "Generated successfully");
+    courseId = res.body.course_id;
+  }, 60 * 1000);
+
+  it("Gagal generate pertanyaan dan jawaban dengan beberapa argumen dikosongkan [400]", async () => {
+    const res = await request(app).post("/generate-course/1").send({
+      question_type: "",
+      grade: "12",
+      subject: "Matematika",
+      subject_topic: "Kombinatorik",
+      questions_total: "5",
+      choices_total: "3",
+    });
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty("msg", "Missing parameters: question_type");
+  });
+});
+
+describe("Endpoint Course", () => {
+  it("Berhasil mendapatkan data course dengan ID valid [200]", async () => {
+    const res = await request(app).get(`/course/${courseId}`);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty(
       "msg",
@@ -13,56 +43,43 @@ describe("course endpoint", () => {
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
-  it("should return 404 if course ID is not found", async () => {
+  it("Gagal mendapatkan data course dengan ID tidak valid [400]", async () => {
     const res = await request(app).get("/course/999");
-    expect(res.statusCode).toEqual(404);
+    expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty(
-      "error",
+      "msg",
       "Course not found or no questions available."
     );
   });
 
-  it("should return 500 if there is an error fetching course questions", async () => {
-    const res = await request(app).get("/course/error");
-    if (res.statusCode !== 500) {
-      console.log("Manual check required for error simulation");
-    } else {
-      expect(res.statusCode).toEqual(500);
-      expect(res.body).toHaveProperty(
-        "error",
-        "Error fetching course questions."
-      );
-    }
-  });
-});
-
-describe("userCourse endpoint", () => {
-  it("should fetch courses for a valid user ID", async () => {
-    const res = await request(app).get("/user/course/1");
+  it("Berhasil mendapatkan detail data course dengan ID valid [200]", async () => {
+    const res = await request(app).get(`/course/${courseId}/detail`);
     expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("msg", "Successfully get course detail");
     expect(res.body).toHaveProperty("data");
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
-  it("should return 404 if user ID has no courses", async () => {
-    const res = await request(app).get("/user/course/999");
-    expect(res.statusCode).toEqual(404);
-    expect(res.body).toHaveProperty(
-      "error",
-      "Course not found or no courses available."
-    );
+  it("Gagal mendapatkan detail data course dengan ID tidak valid [400]", async () => {
+    const res = await request(app).get(`/course/999/detail`);
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty("msg", "Course not found");
+  });
+});
+
+describe("Course User Endpoint", () => {
+  it("Berhasil mendapatkan course - course yang dimiliki oleh user dengan ID yang valid [200]", async () => {
+    const res = await request(app).get("/user/course/1");
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty("msg", "Successfully get user courses");
   });
 
-  it("should return 500 if there is an error fetching user courses", async () => {
-    const res = await request(app).get("/user/course/error");
-    if (res.statusCode !== 500) {
-      console.log("Manual check required for error simulation");
-    } else {
-      expect(res.statusCode).toEqual(500);
-      expect(res.body).toHaveProperty(
-        "error",
-        "Error fetching course questions."
-      );
-    }
+  it("Gagal mendapatkan course - course yang dimiliki oleh user dengan ID yang tidak valid [400]", async () => {
+    const res = await request(app).get("/user/course/999");
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty(
+      "msg",
+      "User course not found or no courses available."
+    );
   });
 });

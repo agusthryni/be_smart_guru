@@ -14,6 +14,15 @@ exports.editProfile = async (req, res) => {
   }
 
   try {
+    const userQuery = "SELECT id FROM users WHERE id = ?";
+    const dbSelect = await db.query(userQuery, [id_user]);
+
+    if (dbSelect.length === 0) {
+      return res.status(400).json({
+        msg: "Can't found user with that id",
+      });
+    }
+
     const profileQuery =
       "UPDATE users SET name = ?, email = ?, telephone = ?, address = ? WHERE id = ?";
     const dbInsert = await db.query(profileQuery, [

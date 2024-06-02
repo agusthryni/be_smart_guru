@@ -37,6 +37,7 @@ exports.register = async (req, res) => {
     if (dbInsert) {
       return res.status(200).json({
         msg: "Successfuly created the account",
+        user_id: dbInsert.insertId,
       });
     } else {
       return res.status(500).json({

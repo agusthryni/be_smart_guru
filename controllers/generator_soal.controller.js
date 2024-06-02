@@ -30,7 +30,7 @@ exports.generateCourse = async (req, res) => {
 
     return res
       .status(400)
-      .json({ error: `Missing parameters: ${missingParams.join(", ")}` });
+      .json({ msg: `Missing parameters: ${missingParams.join(", ")}` });
   }
 
   const prompt = `Create a ${question_type} quiz for the subject ${subject} with the topic ${subject_topic} for ${grade} high school grade consisting of ${questions_total} questions. Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this:
