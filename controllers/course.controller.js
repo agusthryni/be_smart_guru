@@ -142,7 +142,7 @@ exports.userCourse = async (req, res) => {
   const { id_user } = req.params;
 
   try {
-    const courseQuery = "SELECT * FROM courses WHERE id_user = ?";
+    const courseQuery = "SELECT * FROM courses WHERE id_user = ? ORDER BY id DESC";
     const courses = await db.query(courseQuery, [id_user]);
 
     if (courses.length === 0) {
