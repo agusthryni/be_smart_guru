@@ -159,3 +159,70 @@ exports.userCourse = async (req, res) => {
     res.status(500).json({ msg: "Error fetching course questions." });
   }
 };
+
+exports.submit = async (req, res) => {
+  const { id_user } = req.params;
+  var { id_course, answers } = req.body;
+
+  answers = answers.replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ');
+  answers = JSON.parse(answers);
+
+  if (!id_course || !Array.isArray(answers) || answers.length === 0) {
+    return res.status(400).json({
+      msg: "Invalid data format or empty answers array",
+    });
+  }
+
+  try {
+    for (const answer of answers) {
+      const { id, answerId } = answer;
+      const query = `
+          INSERT INTO user_answers (id_user, id_question, id_answer)
+          VALUES (?, ?, ?)
+          ON DUPLICATE KEY UPDATE id_answer = VALUES(id_answer)
+        `;
+
+      await db.query(query, [id_user, id, answerId || null]);
+    }
+
+    // Calculate score out of 100
+    const totalQuestionsQuery = `
+        SELECT COUNT(*) AS total_questions
+        FROM user_answers
+        WHERE id_user = ? AND id_question IN (SELECT id_question FROM user_answers WHERE id_user = ?)
+      `;
+    const [totalQuestionsRows] = await db.query(totalQuestionsQuery, [
+      id_user,
+      id_user,
+    ]);
+    const totalQuestions = totalQuestionsRows.total_questions || 0;
+
+    const correctAnswersQuery = `
+        SELECT COUNT(*) AS correct_answers
+        FROM user_answers ua
+        INNER JOIN possible_answers pa ON ua.id_answer = pa.id
+        WHERE ua.id_user = ? AND pa.is_correct = 1
+      `;
+    const [correctAnswersRows] = await db.query(correctAnswersQuery, [id_user]);
+    const correctAnswers = correctAnswersRows.correct_answers || 0;
+
+    const score =
+      totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
+
+    // Update courses table
+    const updateQuery = `
+        UPDATE courses SET score = ? WHERE id = ?
+      `;
+    await db.query(updateQuery, [score, id_course]);
+
+    return res.status(200).json({
+      msg: "Answers submitted successfully",
+      score: score,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      msg: "Failed to submit answers",
+    });
+  }
+};
