@@ -159,7 +159,7 @@ describe("Endpoint Edit User", () => {
   });
 
   it("Gagal mengubah password user karena password user salah [400]", async () => {
-    const res = await request(app).put(`/user/change_password/999`).send({
+    const res = await request(app).put(`/user/change_password/${userId}`).send({
       password: "salah",
       new_password: "new_password",
       verify_password: "new_password",

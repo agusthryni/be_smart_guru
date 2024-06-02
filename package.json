@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "start index.js",
-    "test": "jest --runInBand --forceExit"
+    "test": "jest --runInBand --forceExit --verbose"
   },
   "keywords": [],
   "author": "",

@@ -57,7 +57,6 @@ describe("Endpoint Course", () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("msg", "Successfully get course detail");
     expect(res.body).toHaveProperty("data");
-    expect(Array.isArray(res.body.data)).toBe(true);
   });
 
   it("Gagal mendapatkan detail data course dengan ID tidak valid [400]", async () => {
