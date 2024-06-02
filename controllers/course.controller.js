@@ -137,26 +137,34 @@ exports.courseTest = async (req, res) => {
     res.status(500).json({ error: "Error fetching course questions." });
   }
 };
-
 exports.userCourse = async (req, res) => {
   const { id_user } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+
+  const offset = (page - 1) * limit;
 
   try {
-    const courseQuery = "SELECT * FROM courses WHERE id_user = ? ORDER BY id DESC";
-    const courses = await db.query(courseQuery, [id_user]);
+    const courseQuery =
+      "SELECT * FROM courses WHERE id_user = ? ORDER BY id DESC LIMIT ? OFFSET ?";
+    const courses = await db.query(courseQuery, [
+      id_user,
+      `${limit}`,
+      `${offset}`,
+    ]);
 
     if (courses.length === 0) {
       return res
-        .status(400)
+        .status(404)
         .json({ msg: "User course not found or no courses available." });
-    } else if (courses.length >= 1) {
-      return res.status(200).json({
-        msg: "Successfully get user courses",
-        data: courses,
-      });
     }
+
+    return res.status(200).json({
+      msg: "Successfully get user courses",
+      data: courses,
+    });
   } catch (error) {
-    res.status(500).json({ msg: "Error fetching course questions." });
+    console.error("Error fetching user courses:", error);
+    res.status(500).json({ msg: "Error fetching user courses." });
   }
 };
 
@@ -234,7 +242,9 @@ exports.stats = async (req, res) => {
       FROM questions 
       WHERE id_course = ?
     `;
-    const [totalQuestionsResult] = await db.query(totalQuestionsQuery, [id_course]);
+    const [totalQuestionsResult] = await db.query(totalQuestionsQuery, [
+      id_course,
+    ]);
     const totalQuestions = totalQuestionsResult.total_questions;
 
     // Fetch total correct answers for the course
@@ -245,7 +255,10 @@ exports.stats = async (req, res) => {
       JOIN questions q ON ua.id_question = q.id
       WHERE q.id_course = ? AND pa.is_correct = 1
     `;
-    const [totalCorrectAnswersResult] = await db.query(totalCorrectAnswersQuery, [id_course]);
+    const [totalCorrectAnswersResult] = await db.query(
+      totalCorrectAnswersQuery,
+      [id_course]
+    );
     const totalCorrectAnswers = totalCorrectAnswersResult.total_correct_answers;
 
     // Calculate total wrong answers
@@ -258,8 +271,12 @@ exports.stats = async (req, res) => {
       JOIN questions q ON ua.id_question = q.id
       WHERE q.id_course = ?
     `;
-    const [totalAnsweredQuestionsResult] = await db.query(totalAnsweredQuestionsQuery, [id_course]);
-    const totalAnsweredQuestions = totalAnsweredQuestionsResult.total_answered_questions;
+    const [totalAnsweredQuestionsResult] = await db.query(
+      totalAnsweredQuestionsQuery,
+      [id_course]
+    );
+    const totalAnsweredQuestions =
+      totalAnsweredQuestionsResult.total_answered_questions;
 
     // Calculate total not answered questions
     const totalNotAnsweredQuestions = totalQuestions - totalAnsweredQuestions;
