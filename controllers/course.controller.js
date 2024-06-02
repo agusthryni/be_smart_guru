@@ -49,13 +49,36 @@ exports.course = async (req, res) => {
   }
 };
 
+exports.courseDetail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const courseDetailQuery =
+      "SELECT c.id, c.grade, c.subject, c.subject_topic, c.questions_total FROM courses c WHERE c.id = ?";
+    const courseDetail = await db.query(courseDetailQuery, [id]);
+
+    if (courseDetail.length === 0) {
+      return res.status(404).json({ error: "Course not found" });
+    }
+
+    return res.status(200).json({
+      msg: "Successfully get course detail",
+      data: courseDetail[0],
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Something went wrong when trying to get course details",
+    });
+  }
+};
+
 exports.courseTest = async (req, res) => {
   const { id } = req.params;
 
   try {
     // Fetch the question and its possible answers from the database
     const questionQuery =
-      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM questions q LEFT JOIN Possible_Answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
+      "SELECT q.id, q.question, pa.id AS answer_id, pa.answer_content AS answer_content FROM questions q LEFT JOIN possible_answers pa ON q.id = pa.id_question WHERE q.id_course = ?";
     const questions = await db.query(questionQuery, [id]);
 
     if (questions.length === 0) {
