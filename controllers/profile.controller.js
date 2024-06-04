@@ -1,5 +1,6 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -148,4 +149,55 @@ exports.contactUs = async (req, res) => {
       msg: "Failed to send your message",
     });
   }
+};
+
+exports.uploadProfilePhoto = async (req, res) => {
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/");
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      const extension = file.originalname.split(".").pop();
+      cb(null, uniqueSuffix + "." + extension);
+    },
+  });
+
+  const upload = multer({ storage: storage }).single("profile_photo");
+
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({
+        msg: "Failed to upload profile photo",
+      });
+    }
+
+    const uploadedFile = req.file;
+    const userId = req.body.user_id;
+
+    try {
+      const updateQuery = `UPDATE users SET image = ? WHERE id = ?`;
+      const dbUpdate = await db.query(updateQuery, [
+        uploadedFile.filename,
+        userId,
+      ]);
+
+      if (dbUpdate) {
+        return res.status(200).json({
+          msg: "Profile photo uploaded successfully",
+          photo_path: uploadedFile.path,
+        });
+      } else {
+        return res.status(500).json({
+          msg: "Failed to update user profile photo",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        msg: "Failed to update user profile photo",
+      });
+    }
+  });
 };
