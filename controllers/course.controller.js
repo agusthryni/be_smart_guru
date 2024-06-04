@@ -236,6 +236,13 @@ exports.stats = async (req, res) => {
   const { id_course } = req.params;
 
   try {
+    const coursesQuery = "SELECT id FROM courses WHERE id = ?";
+    const courses = await db.query(coursesQuery, [id]);
+
+    if (courses.length === 0) {
+      return res.status(400).json({ msg: "Course not found." });
+    }
+
     // Fetch total questions for the course
     const totalQuestionsQuery = `
       SELECT COUNT(*) as total_questions 
