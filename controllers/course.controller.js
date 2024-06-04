@@ -154,7 +154,7 @@ exports.userCourse = async (req, res) => {
 
     if (courses.length === 0) {
       return res
-        .status(404)
+        .status(400)
         .json({ msg: "User course not found or no courses available." });
     }
 
