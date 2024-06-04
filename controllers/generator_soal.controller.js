@@ -39,7 +39,7 @@ exports.generateCourse = async (req, res) => {
   const prompt =
     `Create a ${question_type} quiz for the subject ${subject} with the topic ${subject_topic} ` +
     (sub_subject_topic ? `and the subtopic is ${sub_subject_topic}` : "") +
-    ` for ${grade} high school grade consisting of ${questions_total} questions and if the question has an equation please format the equation in TeX like this example question "When \(a \ne 0 \), there are two solutions to \(ax^2 + bx + c = 0\) and they are $$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$". Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this:
+    ` for ${grade} high school grade consisting of ${questions_total} questions and if the question has an equation please format the equation in TeX like this example question When \(a \ne 0 \), there are two solutions to \(ax^2 + bx + c = 0\) and they are $$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$. Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this:
   [{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}},{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}}], please use the key name exactly as the example`;
 
   const ai = new openai({
