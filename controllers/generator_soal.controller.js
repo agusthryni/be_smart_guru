@@ -18,7 +18,7 @@ exports.generateCourse = async (req, res) => {
     !grade ||
     !subject ||
     !subject_topic ||
-    !sub_subject_topic ||
+    // !sub_subject_topic ||
     !questions_total ||
     !choices_total
   ) {
@@ -27,7 +27,7 @@ exports.generateCourse = async (req, res) => {
     if (!grade) missingParams.push("grade");
     if (!subject) missingParams.push("subject");
     if (!subject_topic) missingParams.push("subject_topic");
-    if (!sub_subject_topic) missingParams.push("sub_subject_topic");
+    // if (!sub_subject_topic) missingParams.push("sub_subject_topic");
     if (!questions_total) missingParams.push("questions_total");
     if (!choices_total) missingParams.push("choices_total");
 
@@ -36,8 +36,10 @@ exports.generateCourse = async (req, res) => {
       .json({ msg: `Missing parameters: ${missingParams.join(", ")}` });
   }
 
-  const prompt = `Create a ${question_type} quiz for the subject ${subject} with the topic ${subject_topic} and the subtopic is ${sub_subject_topic}for ${grade} high school grade consisting of ${questions_total} questions. Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this:
-  [{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}},{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}}], please use the key name exactly as the example`;
+  const prompt =
+    `Create a ${question_type} quiz for the subject ${subject} with the topic ${subject_topic} ` +
+    (sub_subject_topic ? `and the subtopic is ${sub_subject_topic}` : "") +
+    ` for ${grade} high school grade consisting of ${questions_total} questions and please format the questions and answers in flutter_tex. Each question has ${choices_total} answer choices. The format JSON inside key named data and wrapped in an array with keys for questions, choices, and answers without alphabet to make it easy to parse. An example of the format is like this: [{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}},{"question":"the question here","choices":[{"content":"choice_1"},{"content":"choice_2"},{"content":"choice_3"}, and more...],"answer":{"content":"choice_x"}}], please use the key name exactly as the example`;
 
   const ai = new openai({
     apiKey: process.env.OPENAI_KEY,
@@ -59,7 +61,7 @@ exports.generateCourse = async (req, res) => {
       grade,
       subject,
       subject_topic,
-      sub_subject_topic,
+      sub_subject_topic ? sub_subject_topic : null,
       questions_total,
       choices_total,
     ]);
