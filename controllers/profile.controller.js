@@ -187,6 +187,7 @@ exports.uploadProfilePhoto = async (req, res) => {
       "image/png",
       "image/gif",
       "image/webp",
+      "image/jpg",
     ];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
