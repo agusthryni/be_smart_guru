@@ -153,6 +153,23 @@ exports.contactUs = async (req, res) => {
 };
 
 exports.uploadProfilePhoto = async (req, res) => {
+  const { id_user } = req.params;
+
+  try {
+    const userQuery = "SELECT id FROM users WHERE id = ?";
+    const dbSelect = await db.query(userQuery, [id_user]);
+
+    if (dbSelect.length === 0) {
+      return res.status(400).json({
+        msg: "Can't found user with that id",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      msg: "Error when trying to get user",
+    });
+  }
+
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, path.join(__dirname, "..", "uploads"));
@@ -164,7 +181,26 @@ exports.uploadProfilePhoto = async (req, res) => {
     },
   });
 
-  const upload = multer({ storage: storage }).single("profile_photo");
+  const fileFilter = (req, file, cb) => {
+    const allowedMimeTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      // cb(new Error("Invalid file type. Only images are allowed."));
+      return res.status(500).json({
+        msg: "Invalid file type. Only images are allowed.",
+      });
+    }
+  };
+
+  const upload = multer({ storage: storage, fileFilter: fileFilter }).single(
+    "profile_photo"
+  );
 
   upload(req, res, async (err) => {
     if (err) {
@@ -175,7 +211,6 @@ exports.uploadProfilePhoto = async (req, res) => {
     }
 
     const uploadedFile = req.file;
-    const { id_user } = req.params;
 
     try {
       const updateQuery = `UPDATE users SET image = ? WHERE id = ?`;
