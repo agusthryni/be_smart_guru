@@ -12,7 +12,7 @@ exports.chat = async (req, res) => {
   }
 
   try {
-    const prompt = `Kamu adalah seorang yang ahli dalam akademik, kamu akan ditanyai hal seputar mata pelajaran sekolah menengah atas kelas 10 sampai dengan 12. Jawablah pertanyaan berikut dengan penjelasan yang mudah: ${message}`;
+    const prompt = `Kamu adalah seorang yang ahli dalam akademik, kamu akan ditanyai hal seputar mata pelajaran sekolah menengah atas kelas 10 sampai dengan 12. Jawablah pertanyaan berikut dengan penjelasan yang mudah : ${message}.`;
     const ai = new openai({
       apiKey: process.env.OPENAI_KEY,
       dangerouslyAllowBrowser: true,
@@ -24,8 +24,12 @@ exports.chat = async (req, res) => {
       max_tokens: 3000,
     });
 
-    const reply = result.data.choices[0].message.content;
-    res.send({ reply });
+    answer = result.choices[0].message.content;
+
+    return res.status(200).json({
+      msg: "Successfully get answer from OpenAI",
+      answer: answer,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
