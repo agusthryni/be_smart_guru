@@ -192,7 +192,7 @@ exports.uploadProfilePhoto = async (req, res) => {
       cb(null, true);
     } else {
       // cb(new Error("Invalid file type. Only images are allowed."));
-      return res.status(500).json({
+      return res.status(400).json({
         msg: "Invalid file type. Only images are allowed.",
       });
     }
