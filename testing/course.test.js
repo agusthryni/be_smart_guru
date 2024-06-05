@@ -3,19 +3,23 @@ const app = "http://besg-test.panti.my.id";
 var courseId;
 
 describe("Endpoint Generate Course", () => {
-  it("Berhasil generate pertanyaan dan jawaban dengan data valid [200]", async () => {
-    const res = await request(app).post("/generate-course/1").send({
-      question_type: "Pilihan Ganda",
-      grade: "12",
-      subject: "Matematika",
-      subject_topic: "Kombinatorik",
-      questions_total: "5",
-      choices_total: "3",
-    });
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("msg", "Generated successfully");
-    courseId = res.body.course_id;
-  }, 60 * 1000);
+  it(
+    "Berhasil generate pertanyaan dan jawaban dengan data valid [200]",
+    async () => {
+      const res = await request(app).post("/generate-course/1").send({
+        question_type: "Pilihan Ganda",
+        grade: "12",
+        subject: "Matematika",
+        subject_topic: "Kombinatorik",
+        questions_total: "5",
+        choices_total: "3",
+      });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty("msg", "Generated successfully");
+      courseId = res.body.course_id;
+    },
+    60 * 1000
+  );
 
   it("Gagal generate pertanyaan dan jawaban dengan beberapa argumen dikosongkan [400]", async () => {
     const res = await request(app).post("/generate-course/1").send({
@@ -80,5 +84,22 @@ describe("Course User Endpoint", () => {
       "msg",
       "User course not found or no courses available."
     );
+  });
+});
+
+describe("Endpoint Course Stats", () => {
+  it("Berhasil mendapatkan statistik course dengan ID valid [200]", async () => {
+    const res = await request(app).get("/course/${courseId}/stats");
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty(
+      "msg",
+      "Successfully get course statistics"
+    );
+  });
+
+  it("Gagal mendapatkan statistik course dengan ID tidak valid [500]", async () => {
+    const res = await request(app).get("/course/999/stats");
+    expect(res.statusCode).toEqual(500);
+    expect(res.body).toHaveProperty("msg", "Failed to fetch course statistics");
   });
 });
