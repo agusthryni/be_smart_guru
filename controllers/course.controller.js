@@ -179,6 +179,22 @@ exports.submit = async (req, res) => {
   }
 
   try {
+    const userQuery = "SELECT id FROM users WHERE id = ?";
+    const dbSelect = await db.query(userQuery, [id_user]);
+
+    if (dbSelect.length === 0) {
+      return res.status(400).json({
+        msg: "Can't found user with that id",
+      });
+    }
+
+    const coursesQuery = "SELECT id FROM courses WHERE id = ?";
+    const courses = await db.query(coursesQuery, [id_course]);
+
+    if (courses.length === 0) {
+      return res.status(400).json({ msg: "Course not found." });
+    }
+
     for (const answer of answers) {
       const { id, answerId } = answer;
       const query = `
@@ -237,7 +253,7 @@ exports.stats = async (req, res) => {
 
   try {
     const coursesQuery = "SELECT id FROM courses WHERE id = ?";
-    const courses = await db.query(coursesQuery, [id]);
+    const courses = await db.query(coursesQuery, [id_course]);
 
     if (courses.length === 0) {
       return res.status(400).json({ msg: "Course not found." });
