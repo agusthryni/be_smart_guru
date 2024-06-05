@@ -189,6 +189,36 @@ describe("Endpoint Edit User", () => {
       "Parameter has null or invalid values"
     );
   });
+
+  it("Berhasil mengubah foto profil user dengan ID yang valid dan foto file terupload [200]", async () => {
+    const res = await request(app)
+      .post("/user/upload_profile_photo/1")
+      .attach("profile_photo", "./testing/assets/image.png");
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty(
+      "msg",
+      "Profile photo uploaded successfully"
+    );
+  });
+
+  it("Gagal mengubah foto profil user dengan ID yang tidak valid [400]", async () => {
+    const res = await request(app)
+      .post("/user/upload_profile_photo/999")
+      .attach("profile_photo", "./testing/assets/image.png");
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty("msg", "Can't found user with that id");
+  });
+
+  it("Gagal mengubah foto profil user dengan ID valid tetapi bukan file gambar [400]", async () => {
+    const res = await request(app)
+      .post("/user/upload_profile_photo/1")
+      .attach("profile_photo", "./testing/course.test.js");
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty(
+      "msg",
+      "Invalid file type. Only images are allowed."
+    );
+  });
 });
 
 describe("Endpoint Contact Us", () => {
