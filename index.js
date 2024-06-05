@@ -27,6 +27,9 @@ app.use("/", CourseRoutes);
 const ProfileRoutes = require("./routes/profile.route");
 app.use("/", ProfileRoutes);
 
+const ChatbotRoutes = require("./routes/chatbot.route");
+app.use("/", ChatbotRoutes);
+
 app.listen(port, () => {
   console.log(`Aplikasi berjalan pada port ${port}`);
 });
