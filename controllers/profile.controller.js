@@ -1,6 +1,7 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
+const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -174,19 +175,19 @@ exports.uploadProfilePhoto = async (req, res) => {
     }
 
     const uploadedFile = req.file;
-    const userId = req.body.user_id;
+    const { id_user } = req.params;
 
     try {
       const updateQuery = `UPDATE users SET image = ? WHERE id = ?`;
       const dbUpdate = await db.query(updateQuery, [
         uploadedFile.filename,
-        userId,
+        id_user,
       ]);
 
       if (dbUpdate) {
         return res.status(200).json({
           msg: "Profile photo uploaded successfully",
-          photo_path: uploadedFile.path,
+          photo_name: uploadedFile.filename,
         });
       } else {
         return res.status(500).json({
