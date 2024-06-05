@@ -148,7 +148,7 @@ describe("Course User Endpoint", () => {
 
 describe("Endpoint Course Stats", () => {
   it("Berhasil mendapatkan statistik course dengan ID valid [200]", async () => {
-    const res = await request(app).get("/course/${courseId}/stats");
+    const res = await request(app).get(`/course/${courseId}/stats`);
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty(
       "msg",
