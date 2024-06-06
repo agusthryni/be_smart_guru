@@ -192,7 +192,6 @@ exports.uploadProfilePhoto = async (req, res) => {
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      // cb(new Error("Invalid file type. Only images are allowed."));
       return res.status(400).json({
         msg: "Invalid file type. Only images are allowed.",
       });

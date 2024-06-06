@@ -129,7 +129,7 @@ describe("Endpoint Course", () => {
   });
 });
 
-describe("Course User Endpoint", () => {
+describe("Endpoint Course User", () => {
   it("Berhasil mendapatkan course - course yang dimiliki oleh user dengan ID yang valid [200]", async () => {
     const res = await request(app).get("/user/course/1");
     expect(res.statusCode).toEqual(200);

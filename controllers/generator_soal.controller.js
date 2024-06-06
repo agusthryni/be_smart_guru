@@ -18,7 +18,6 @@ exports.generateCourse = async (req, res) => {
     !grade ||
     !subject ||
     !subject_topic ||
-    // !sub_subject_topic ||
     !questions_total ||
     !choices_total
   ) {
@@ -27,7 +26,6 @@ exports.generateCourse = async (req, res) => {
     if (!grade) missingParams.push("grade");
     if (!subject) missingParams.push("subject");
     if (!subject_topic) missingParams.push("subject_topic");
-    // if (!sub_subject_topic) missingParams.push("sub_subject_topic");
     if (!questions_total) missingParams.push("questions_total");
     if (!choices_total) missingParams.push("choices_total");
 
@@ -102,7 +100,6 @@ exports.generateCourse = async (req, res) => {
       msg: "Generated successfully",
       course_id: courseId,
     });
-    // res.send("Course generated successfully!");
   } catch (error) {
     return console.error("Error inserting data:", error);
   }

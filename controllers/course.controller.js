@@ -39,10 +39,6 @@ exports.course = async (req, res) => {
       msg: "Successfully get the question and answer",
       data: Object.values(questionsWithAnswers),
     });
-    // console.log(questionsWithAnswers);
-    // Object.values(questionsWithAnswers).map((question) => {
-    //   console.log(question);
-    // });
   } catch (error) {
     console.error("Error fetching course questions:", error);
     res.status(500).json({ error: "Error fetching course questions." });

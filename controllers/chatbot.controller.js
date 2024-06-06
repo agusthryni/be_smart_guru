@@ -12,7 +12,8 @@ exports.chat = async (req, res) => {
   }
 
   try {
-    const prompt = `Kamu adalah seorang yang ahli dalam akademik, kamu akan ditanyai hal seputar mata pelajaran sekolah menengah atas kelas 10 sampai dengan 12. Jawablah pertanyaan berikut dengan penjelasan yang mudah : ${message}.`;
+    const prompt =
+      "Kamu adalah seorang yang ahli dalam akademik, kamu akan ditanyai hal seputar mata pelajaran sekolah menengah atas kelas 10 sampai dengan 12. Jawablah pertanyaan berikut dengan penjelasan yang mudah : ${message}.";
     const ai = new openai({
       apiKey: process.env.OPENAI_KEY,
       dangerouslyAllowBrowser: true,
