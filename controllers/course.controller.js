@@ -375,7 +375,7 @@ exports.review = async (req, res) => {
             id_answer: null,
             answer_content: "User not answered",
           },
-          is_correct: false,
+          is_correct: 0,
         };
       }
 
