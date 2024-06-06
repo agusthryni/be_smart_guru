@@ -318,3 +318,89 @@ exports.stats = async (req, res) => {
     });
   }
 };
+
+exports.review = async (req, res) => {
+  const { id_course } = req.params;
+
+  try {
+    // Fetch questions and possible answers for the course
+    const questionQuery = `
+      SELECT 
+        q.id AS question_id, 
+        q.question, 
+        pa.id AS answer_id, 
+        pa.answer_content, 
+        pa.is_correct 
+      FROM questions q 
+      LEFT JOIN possible_answers pa ON q.id = pa.id_question 
+      WHERE q.id_course = ?`;
+    const questions = await db.query(questionQuery, [id_course]);
+
+    if (questions.length === 0) {
+      return res
+        .status(400)
+        .json({ msg: "Course not found or no questions available." });
+    }
+
+    // Fetch user answers for the course
+    const userAnswersQuery = `
+      SELECT 
+        ua.id_user, 
+        ua.id_question, 
+        ua.id_answer, 
+        IFNULL(pa.answer_content, 'User not answered') AS user_answer_content
+      FROM user_answers ua 
+      LEFT JOIN possible_answers pa ON ua.id_answer = pa.id
+      LEFT JOIN questions q ON ua.id_question = q.id 
+      WHERE q.id_course = ?`;
+    const userAnswers = await db.query(userAnswersQuery, [id_course]);
+
+    // Map user answers by question ID
+    const userAnswersMap = userAnswers.reduce((acc, ua) => {
+      acc[ua.id_question] = {
+        id_answer: ua.id_answer,
+        answer_content: ua.user_answer_content,
+      };
+      return acc;
+    }, {});
+
+    // Combine data and determine if the user's answer is correct
+    const questionsWithDetails = questions.reduce((acc, question) => {
+      if (!acc[question.question_id]) {
+        acc[question.question_id] = {
+          id: question.question_id,
+          question: question.question,
+          correctAnswer: null,
+          userAnswer: userAnswersMap[question.question_id] || {
+            id_answer: null,
+            answer_content: "User not answered",
+          },
+          is_correct: false,
+        };
+      }
+
+      if (question.is_correct) {
+        acc[question.question_id].correctAnswer = {
+          id_answer: question.answer_id,
+          answer_content: question.answer_content,
+        };
+      }
+
+      if (
+        acc[question.question_id].userAnswer.id_answer === question.answer_id
+      ) {
+        acc[question.question_id].is_correct = question.is_correct;
+      }
+
+      return acc;
+    }, {});
+
+    res.status(200).json({
+      msg: "Successfully retrieved questions and answers",
+      data: Object.values(questionsWithDetails),
+    });
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    res.status(500).json({ error: "Error fetching course details." });
+  }
+};
