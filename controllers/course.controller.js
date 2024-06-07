@@ -154,6 +154,36 @@ exports.userCourse = async (req, res) => {
         .json({ msg: "User course not found or no courses available." });
     }
 
+    // Adding score calculation for each course
+    for (let course of courses) {
+      const totalCorrectAnswersQuery = `
+        SELECT COUNT(*) as total_correct_answers
+        FROM user_answers ua
+        JOIN possible_answers pa ON ua.id_answer = pa.id
+        JOIN questions q ON ua.id_question = q.id
+        WHERE q.id_course = ? AND pa.is_correct = 1
+      `;
+      const [totalCorrectAnswersResult] = await db.query(
+        totalCorrectAnswersQuery,
+        [course.id]
+      );
+      const totalCorrectAnswers =
+        totalCorrectAnswersResult.total_correct_answers;
+
+      const totalQuestionsQuery = `
+        SELECT COUNT(*) as total_questions 
+        FROM questions 
+        WHERE id_course = ?
+      `;
+      const [totalQuestionsResult] = await db.query(totalQuestionsQuery, [
+        course.id,
+      ]);
+      const totalQuestions = totalQuestionsResult.total_questions;
+
+      const score = (totalCorrectAnswers / totalQuestions) * 100;
+      course.score = score;
+    }
+
     return res.status(200).json({
       msg: "Successfully get user courses",
       data: courses,
