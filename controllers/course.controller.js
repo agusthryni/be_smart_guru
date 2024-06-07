@@ -57,33 +57,9 @@ exports.courseDetail = async (req, res) => {
       return res.status(400).json({ msg: "Course not found" });
     }
 
-    const totalQuestionsQuery = `
-      SELECT COUNT(*) as total_questions 
-      FROM questions 
-      WHERE id_course = ?
-    `;
-    const [totalQuestionsResult] = await db.query(totalQuestionsQuery, [id]);
-    const totalQuestions = totalQuestionsResult.total_questions;
-
-    const totalCorrectAnswersQuery = `
-      SELECT COUNT(*) as total_correct_answers
-      FROM user_answers ua
-      JOIN possible_answers pa ON ua.id_answer = pa.id
-      JOIN questions q ON ua.id_question = q.id
-      WHERE q.id_course = ? AND pa.is_correct = 1
-    `;
-    const [totalCorrectAnswersResult] = await db.query(
-      totalCorrectAnswersQuery,
-      [id]
-    );
-    const totalCorrectAnswers = totalCorrectAnswersResult.total_correct_answers;
-
-    const score = (totalCorrectAnswers / totalQuestions) * 100;
-
     return res.status(200).json({
       msg: "Successfully get course detail",
       data: courseDetail[0],
-      score: score,
     });
   } catch (error) {
     return res.status(500).json({
