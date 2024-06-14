@@ -8,6 +8,6 @@ router.get("/user/course/:id_user", CourseController.userCourse);
 router.post("/submit/:id_user", CourseController.submit);
 router.get("/course/:id_course/stats", CourseController.stats);
 router.get("/course/:id_course/review", CourseController.review);
-router.get("/answer/:id_course", CourseController.review);
+router.get("/answer/:id_course", CourseController.answer);
 
 module.exports = router;
