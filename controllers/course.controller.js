@@ -434,3 +434,48 @@ exports.review = async (req, res) => {
     res.status(500).json({ error: "Error fetching course details." });
   }
 };
+
+exports.answer = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Fetch the question and its possible answers from the database
+    const questionQuery =
+      "SELECT * FROM possible_answers a JOIN questions q ON q.id = a.id_question WHERE q.id_course = ?"
+      const questions = await db.query(questionQuery, [id]);
+
+    if (questions.length === 0) {
+      return res
+        .status(400)
+        .json({ msg: "Course not found or no questions available." });
+    }
+
+    // Group possible answers by question ID
+    // const questionsWithAnswers = questions.reduce((acc, question) => {
+    //   if (!acc[question.id]) {
+    //     acc[question.id] = {
+    //       id: question.id,
+    //       question: question.question,
+    //       answers: [],
+    //     };
+    //   }
+
+    //   if (question.answer_id) {
+    //     acc[question.id].answers.push({
+    //       id: question.answer_id,
+    //       content: question.answer_content,
+    //     });
+    //   }
+
+    //   return acc;
+    // }, {});
+
+    res.status(200).json({
+      msg: "Successfully get the question and answer",
+      data: questions,
+    });
+  } catch (error) {
+    console.error("Error fetching course questions:", error);
+    res.status(500).json({ error: "Error fetching course questions." });
+  }
+};
